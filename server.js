@@ -12,7 +12,7 @@ const session = require("express-session");
 
 app.use(cookieParser());
 app.use(session({
-    secret: process.env.secret,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -41,7 +41,7 @@ app.use(adminroutes);
 
 const mongoose = require("mongoose");
 const category = require("./models/category.models");
-let connectionString = process.env.connectionString;
+let connectionString = process.env.MONGODB_URI;
 mongoose.connect(connectionString)
 .then(()=>{
     console.log(`Connected To:${connectionString}`)
