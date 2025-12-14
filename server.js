@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express  = require("express");
 
 let app = express();
@@ -10,7 +11,7 @@ const session = require("express-session");
 
 app.use(cookieParser());
 app.use(session({
-    secret: "My session secret",
+    secret: process.env.secret,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -39,7 +40,7 @@ app.use(adminroutes);
 
 const mongoose = require("mongoose");
 const category = require("./models/category.models");
-let connectionString = "mongodb+srv://ahmedaliqurexhi7867_db_user:wuSHVxPPlKX1pzGk@cluster0.mwzmlq7.mongodb.net/?appName=Cluster0";
+let connectionString = process.env.connectionString;
 mongoose.connect(connectionString)
 .then(()=>{
     console.log(`Connected To:${connectionString}`)
