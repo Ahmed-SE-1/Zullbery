@@ -1,4 +1,5 @@
 require('dotenv').config();
+const port = process.env.PORT || 3000;
 const express  = require("express");
 
 let app = express();
@@ -147,7 +148,7 @@ app.get("/:ProductPages/:page?", async (req, res) => {
     });
 });
 
-app.listen(5001, ()=>{
+app.listen(port, ()=>{
     console.log("Server start");
 })
 
