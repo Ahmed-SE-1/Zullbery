@@ -39,8 +39,7 @@ app.use(adminroutes);
 
 const mongoose = require("mongoose");
 const category = require("./models/category.models");
-let connectionString = "mongodb://127.0.0.1:27017/Zullbery";// ipv4 version of mongodb
-// let connectionString = "mongodb://localhost:27017/Zullbery"; //  ipv6 version
+let connectionString = "mongodb+srv://ahmedaliqurexhi7867_db_user:wuSHVxPPlKX1pzGk@cluster0.mwzmlq7.mongodb.net/?appName=Cluster0";
 mongoose.connect(connectionString)
 .then(()=>{
     console.log(`Connected To:${connectionString}`)
@@ -66,11 +65,8 @@ app.get("/add-to-cart/:id", async (req, res) => {
     let cart = req.cookies.cart;
     cart = cart ? cart : [];
     let products = await Product.find({ _id: { $in: cart } });
-    if (products && products.length > 0) { // Check if products array has items
-        return res.render("cart", { layout: false, products:products });
-    } else {
-        return res.status(400).send("Cart is empty.");
-    }
+    // Always render cart page, even if empty
+    return res.render("cart", { layout: false, products: products || [] });
   });
 
   app.get("/cart/delete/:id",(req,res)=>{

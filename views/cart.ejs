@@ -375,6 +375,15 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <% if (!products || products.length === 0) { %>
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <h4>Your cart is empty</h4>
+                                <p class="text-muted">Add some items to your cart to continue shopping.</p>
+                                <a href="/" class="btn btn-primary mt-3">Continue Shopping</a>
+                            </td>
+                        </tr>
+                    <% } else { %>
                     <% let cartTotal = 0; %>
                     <% products.forEach((product, index) => { %>
                         <% const price = parseFloat(product.price) || 0; %>
@@ -389,24 +398,28 @@
                             </td>
                             <td>
                                 <div class="quantity-control">
-                                    <button class="quantity-btn decrease-btn" onclick="updateQuantity(<%= index %>, -1)">-</button>
+                                    <button class="quantity-btn decrease-btn" onclick="updateQuantity('<%= index %>', -1)">-</button>
                                     <input type="number" 
                                            name="Quantity" 
                                            class="quantity-input" 
                                            value="1" 
                                            min="1" 
-                                           onchange="updateSubtotal(<%= index %>)" 
+                                           onchange="updateSubtotal('<%= index %>')" 
                                            data-price="<%= price %>">
-                                    <button class="quantity-btn increase-btn" onclick="updateQuantity(<%= index %>, 1)">+</button>
+                                    <button class="quantity-btn increase-btn" onclick="updateQuantity('<%= index %>', 1)">+</button>
                                 </div>
                                 <div class="size-selector">
-                                    <select name="size" class="form-select size-input" onchange="updateSize(<%= index %>)">
+                                    <select name="size" class="form-select size-input" onchange="updateSize('<%= index %>')">
                                         <% if (product.sizes && product.sizes.length > 0) { %>
-                                            <% product.sizes.forEach(size => { %>
+                                            <% product.sizes.forEach(function(size) { %>
                                                 <option value="<%= size %>">
-                                                    <%= size === 'S' ? `Small (Rs.${price.toFixed(2)})` :
-                                                        size === 'M' ? `Medium (Rs.${(price + 800).toFixed(2)})` :
-                                                        `Large (Rs.${(price + 1500).toFixed(2)})` %>
+                                                    <% if (size === 'S') { %>
+                                                        Small (Rs.<%= price.toFixed(2) %>)
+                                                    <% } else if (size === 'M') { %>
+                                                        Medium (Rs.<%= (price + 800).toFixed(2) %>)
+                                                    <% } else { %>
+                                                        Large (Rs.<%= (price + 1500).toFixed(2) %>)
+                                                    <% } %>
                                                 </option>
                                             <% }); %>
                                         <% } else { %>
@@ -424,6 +437,7 @@
                             </td>
                         </tr>
                     <% }); %>
+                    <% } %>
                 </tbody>
             </table>
 
@@ -439,12 +453,14 @@
                 </h5>
             </div>
 
+            <% if (products && products.length > 0) { %>
             <div class="checkout-container">
                 <button class="checkout-btn" id="proceed-btn">
                     <i class="fas fa-shopping-cart me-2"></i>
                     Proceed to Checkout
                 </button>
             </div>
+            <% } %>
         </div>
     </div>
 
@@ -597,13 +613,14 @@
         let checkout = document.getElementById("checkout");
         let proceed = document.getElementById("proceed-btn");
         let cart = document.getElementById("cart");
-        checkout.style.display ="none";
-        cart.style.display ="block";
-        proceed.addEventListener("click",function(){
-            checkout.style.display ="block";
-            cart.style.display ="none";
-        })
-
+        if (checkout) checkout.style.display = "none";
+        if (cart) cart.style.display = "block";
+        if (proceed) {
+            proceed.addEventListener("click", function(){
+                if (checkout) checkout.style.display = "block";
+                if (cart) cart.style.display = "none";
+            });
+        }
     </script>
 
     <script>
@@ -613,22 +630,6 @@
             const newValue = Math.max(1, parseInt(input.value) + change);
             input.value = newValue;
             updateSubtotal(productIndex);
-        }
-
-        function updateSubtotal(productIndex) {
-            const row = document.querySelector(`tr[data-product-id="${productIndex}"]`);
-            const quantity = parseInt(row.querySelector('.quantity-input').value) || 1;
-            const price = parseFloat(row.querySelector('.quantity-input').dataset.price) || 0;
-            const subtotal = Math.round((price * quantity) * 100) / 100;
-            row.querySelector('.subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-            updateTotal();
-        }
-
-        function updateTotal() {
-            const subtotals = Array.from(document.querySelectorAll('.subtotal'))
-                .map(el => parseFloat(el.textContent.replace('₹', '')) || 0);
-            const total = Math.round(subtotals.reduce((sum, value) => sum + value, 0) * 100) / 100;
-            document.querySelector('input[name="Total"]').value = total.toFixed(2);
         }
 
         // Initialize totals when page loads
@@ -715,6 +716,7 @@
 
         function updateSubtotal(productIndex) {
             const row = document.querySelector(`tr[data-product-id="${productIndex}"]`);
+            if (!row) return;
             const quantity = parseInt(row.querySelector('.quantity-input').value) || 1;
             const price = parseFloat(row.querySelector('.quantity-input').dataset.price) || 0;
             const subtotal = Math.round((price * quantity) * 100) / 100;
@@ -726,7 +728,10 @@
             const subtotals = Array.from(document.querySelectorAll('.subtotal'))
                 .map(el => parseFloat(el.textContent.replace('Rs.', '')) || 0);
             const total = Math.round(subtotals.reduce((sum, value) => sum + value, 0) * 100) / 100;
-            document.querySelector('input[name="Total"]').value = total.toFixed(2);
+            const totalInput = document.querySelector('input[name="Total"]');
+            if (totalInput) {
+                totalInput.value = total.toFixed(2);
+            }
         }
     </script>
 
